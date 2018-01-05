@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <title>Phaser Test</title>
-        <script src="node_modules/phaser-ce/build/phaser.min.js"></script>
+        <script src="assets/phaser.min.js"></script>
         <style>
             *{margin:0;padding:0;}
         </style>
@@ -21,9 +21,9 @@
                 playerSpeed = 300;
                 jumpTimer = 0;
                 function preload () {
-                    game.load.tilemap('map', '1-1.JSON', null, Phaser.Tilemap.TILED_JSON);
-                    game.load.image('1-1_1', 'World1-1Ground.png');
-                    game.load.spritesheet('player', 'player.png', 50,64)
+                    game.load.tilemap('map', 'assets/1-1.JSON', null, Phaser.Tilemap.TILED_JSON);
+                    game.load.image('1-1_1', 'assets/World1-1Ground.png');
+                    game.load.spritesheet('player', 'assets/player.png', 50,64)
                 }
         
                 function create () {
