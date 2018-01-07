@@ -2,92 +2,14 @@
 <html>
     <head>
         <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0"
         <title>Geek Fuel Game</title>
         <script src="assets/phaser.min.js"></script>
         <style>
-            *{margin:0;padding:0;}
+            body{margin:0;padding:0;background:black;}
         </style>
     </head>
     <body>
-        <script type="text/javascript">
-            var game;
-            var map, layer,player,cursors,playerSpeed,jumpTimer;
-            var scaleRatio = window.devicePixelRatio / 3;
-            window.onload = function() {
-                wWidth = window.innerWidth;
-                wHeight = window.innerHeight;
-                game = new Phaser.Game(wWidth, wHeight, Phaser.AUTO, '', { preload: preload, create: create, update: update, render: render });
-                
-                playerSpeed = 300;
-                jumpTimer = 0;
-                function preload () {
-                    game.load.tilemap('map', '/assets/1-1.json', null, Phaser.Tilemap.TILED_JSON);
-                    game.load.image('1-1_1', '/assets/World1-1Ground.png');
-                    game.load.spritesheet('player', '/assets/player.png', 50,64)
-                }
-        
-                function create () {
-                    game.physics.startSystem(Phaser.Physics.ARCADE);
-                    game.stage.backgroundColor = '#3fa9f5';
-                    map = game.add.tilemap('map');
-                    map.addTilesetImage('1-1_1');
-                    map.setCollisionByExclusion([ 6, 7 ]);
-                    layer = map.createLayer('Tile Layer 1');
-                    layer.resizeWorld();
-                    
-                    game.physics.arcade.gravity.y = 1400;
-                    
-                    player = game.add.sprite(100,500, 'player');
-                    player.anchor.setTo(0.5);
-                    player.animations.add('idle', [0],1,false);
-                    player.animations.add('walk', [0],1,false);
-                    player.animations.add('jump', [1],1,false);
-                    
-                    game.physics.arcade.enable(player);
-                    game.camera.follow(player);
-                    player.body.bounce.y = 0.2;
-                    player.body.linearDamping = 1;
-                    player.body.collideWorldBounds = true;
-                    cursors = game.input.keyboard.createCursorKeys();
-                }
-
-                function update(){
-                    game.physics.arcade.collide(player,layer)
-                    player.body.velocity.x = 0;
-                    player.animations.play('idle');
-                    if (cursors.left.isDown)
-                    {
-                        player.animations.play('walk');
-                        player.scale.setTo(-1,1);
-                        player.body.velocity.x -= playerSpeed;
-                    }
-                    else if (cursors.right.isDown)
-                    {
-                        player.animations.play('walk');
-                        player.scale.setTo(1,1);
-                        player.body.velocity.x += playerSpeed;
-                    }
-
-                    if (cursors.up.isDown && (player.body.onFloor() || player.body.touching.down) && game.time.now > jumpTimer)
-                    {
-                        player.animations.play('jump');
-                        player.body.velocity.y = -900;
-                        jumpTimer = game.time.now + 750;
-                    }
-
-                    if(player.body.onFloor() == false){
-                        player.animations.play('jump');
-                    }
-                }
-
-                function render(){
-
-                }
-                
-                
-            };
-            
-            
-            </script>
+        <script type="module" src="assets/main.js"></script>
     </body>
 </html>
