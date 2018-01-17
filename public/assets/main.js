@@ -5,10 +5,8 @@ class Game extends Phaser.Game{
         const width = 1600
         const height = 900
 
-        super(width,height,Phaser.AUTO)
-
+        super(width,height,Phaser.AUTO);
         this.state.add('Level1', Level1)
-
         this.state.start('Level1')
     }
 }
