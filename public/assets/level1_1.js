@@ -156,7 +156,7 @@ export default class extends Phaser.State{
         player.body.bounce.y = 0.1;
         player.body.linearDamping = 1;
         player.body.collideWorldBounds = true;
-        player.body.deltaMax = 128;
+        player.body.deltaMax =  {x: 15, y: 15};
         cursors = g.input.keyboard.createCursorKeys();
         scoreText = g.add.text(25, 25, "x - " + score, {
             font: "30px Arial",
