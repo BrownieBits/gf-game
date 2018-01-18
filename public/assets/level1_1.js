@@ -1,7 +1,7 @@
 var playerSpeed = 400;
 var jumpTimer = 0;
 var g,globalGravity;
-var map,blayer,glayer,wlayer,clayer,olayer,gOrbGroup,rOrbGroup,waterGroup1,waterGroup2,waterGroup3,waterGroup4,waterGroup5,waterGroup6;
+var map,blayer,glayer,wlayer,clayer,olayer,chestGroup1,chestGroup2,gOrbGroup,rOrbGroup,waterGroup1,waterGroup2,waterGroup3,waterGroup4,waterGroup5,waterGroup6;
 var player,cursors,scoreText, score, playerJumped;
 export default class extends Phaser.State{
     init(){
@@ -14,21 +14,40 @@ export default class extends Phaser.State{
     preload(){
         this.load.tilemap('map', '/assets/Maps/1-1.json', null, Phaser.Tilemap.TILED_JSON);
         this.load.image('ground', '/assets/Maps/ground.png');
-        this.load.spritesheet('water', '/assets/Maps/water.png',128,128);
-        this.load.spritesheet('chest', '/assets/Maps/chest.png',128,128);
-        this.load.spritesheet('orbs', '/assets/Maps/orbs.png',128,128);
-        this.load.spritesheet('player', '/assets/player.png', 50,64);
+        this.load.spritesheet('water', '/assets/Maps/water.png',64,64);
+        this.load.spritesheet('chest', '/assets/Maps/chest.png', 64,64);
+        this.load.spritesheet('orbs', '/assets/Maps/orbs.png', 64,64);
+        this.load.spritesheet('player', '/assets/player.png', 64,64);
     }
     create(){
         g = this;
-        globalGravity = 768;
+        globalGravity = 2500;
         score = 0;
+        map = g.add.tilemap('map');
+        map.addTilesetImage('ground','ground');
+        map.addTilesetImage('water','water');
+        map.addTilesetImage('chest','chest');
+        map.addTilesetImage('orbs','orbs');
+        blayer = map.createLayer('Background Layer');
+        glayer = map.createLayer('Ground Layer');
+        wlayer = map.createLayer('Water Layer');
+        clayer = map.createLayer('Chest Layer');
+        olayer = map.createLayer('Orb Layer');
+        blayer.resizeWorld();
+        glayer.resizeWorld();
+        wlayer.resizeWorld();
+        clayer.resizeWorld();
+        olayer.resizeWorld();
+        map.setCollisionByExclusion([33,34,35], true, glayer);
+        chestGroup1 = g.add.group();
+        chestGroup1.enableBody = true;
+        chestGroup1.physicsBodyType = Phaser.Physics.ARCADE;
+        chestGroup2 = g.add.group();
+        chestGroup2.enableBody = true;
+        chestGroup2.physicsBodyType = Phaser.Physics.ARCADE;
         gOrbGroup = g.add.group();
         gOrbGroup.enableBody = true;
         gOrbGroup.physicsBodyType = Phaser.Physics.ARCADE;
-        rOrbGroup = g.add.group();
-        rOrbGroup.enableBody = true;
-        rOrbGroup.physicsBodyType = Phaser.Physics.ARCADE;
         waterGroup1 = g.add.group();
         waterGroup1.enableBody = true;
         waterGroup1.physicsBodyType = Phaser.Physics.ARCADE;
@@ -47,22 +66,28 @@ export default class extends Phaser.State{
         waterGroup6 = g.add.group();
         waterGroup6.enableBody = true;
         waterGroup6.physicsBodyType = Phaser.Physics.ARCADE;
-        map = g.add.tilemap('map');
-        map.addTilesetImage('ground','ground');
-        map.addTilesetImage('water','water');
-        map.addTilesetImage('chest','chest');
-        map.addTilesetImage('orbs','orbs');
-        blayer = map.createLayer('Background Layer');
-        glayer = map.createLayer('Ground Layer');
-        wlayer = map.createLayer('Water Layer');
-        clayer = map.createLayer('Chest Layer');
-        olayer = map.createLayer('Orb Layer');
-        glayer.resizeWorld();
-        wlayer.resizeWorld();
-        clayer.resizeWorld();
-        olayer.resizeWorld();
-        map.setCollisionByExclusion([33,34,35], true, glayer);
         g.physics.arcade.gravity.y = globalGravity;
+        g.physics.arcade.OVERLAP_BIAS = 128;
+        clayer.layer.data.forEach(function(layer){
+            layer.forEach(function(chest){
+                if(chest.index == 90){
+                    var c = chestGroup1.create(chest.worldX,chest.worldY, 'chest');
+                    c.body.allowGravity = false;
+                    chest.index = -1;
+                }
+                else if(chest.index == 92){
+                    var c = chestGroup2.create(chest.worldX,chest.worldY, 'chest');
+                    c.body.allowGravity = false;
+                    chest.index = -1;
+                }
+            })
+        })
+        chestGroup1.callAll('animations.add', 'animations', 'closed', [0], 1, true);
+        chestGroup1.callAll('animations.add', 'animations', 'open', [1], 1, true);
+        chestGroup1.callAll('animations.play', 'animations', 'closed');
+        chestGroup2.callAll('animations.add', 'animations', 'closed', [2], 1, true);
+        chestGroup2.callAll('animations.add', 'animations', 'open', [3], 1, true);
+        chestGroup2.callAll('animations.play', 'animations', 'closed');
         olayer.layer.data.forEach(function(layer){
             layer.forEach(function(orb){
                 if(orb.index == 94){
@@ -70,17 +95,10 @@ export default class extends Phaser.State{
                     o.body.allowGravity = false;
                     orb.index = -1;
                 }
-                else if(orb.index == 106){
-                    var o = rOrbGroup.create(orb.worldX,orb.worldY, 'orbs');
-                    o.body.allowGravity = false;
-                    orb.index = -1;
-                }
             })
         })
         gOrbGroup.callAll('animations.add', 'animations', 'gGlow', [0, 1, 2, 3, 4, 5, 4, 3, 2,1], 5, true);
         gOrbGroup.callAll('animations.play', 'animations', 'gGlow');
-        rOrbGroup.callAll('animations.add', 'animations', 'rGlow', [12, 13, 14, 15, 16, 17, 16, 15, 14, 13], 5, true);
-        rOrbGroup.callAll('animations.play', 'animations', 'rGlow');
         wlayer.layer.data.forEach(function(layer){
             layer.forEach(function(water){
                 if(water.index == 42){
@@ -130,15 +148,15 @@ export default class extends Phaser.State{
         player = g.add.sprite(100,500, 'player');
         player.anchor.setTo(0.5);
         player.animations.add('idle', [0],1,false);
-        player.animations.add('walk', [0],1,false);
-        player.animations.add('jump', [1],1,false);
-        player.scale.setTo(2,2);
+        player.animations.add('walk', [1,2],2,true);
+        player.animations.add('jump', [4],1,false);
         playerJumped = 0;
         g.physics.arcade.enable(player);
         g.camera.follow(player);
         player.body.bounce.y = 0.1;
         player.body.linearDamping = 1;
         player.body.collideWorldBounds = true;
+        player.body.deltaMax = 128;
         cursors = g.input.keyboard.createCursorKeys();
         scoreText = g.add.text(25, 25, "x - " + score, {
             font: "30px Arial",
@@ -150,28 +168,28 @@ export default class extends Phaser.State{
     update(){
         this.physics.arcade.collide(player,glayer,TileCollide,null,this)
         this.physics.arcade.overlap(player, gOrbGroup, collectGreenOrb, null, this);
-        this.physics.arcade.overlap(player, rOrbGroup, collectRedOrb, null, this);
         this.physics.arcade.overlap(player, waterGroup1, playerDie, null, this);
+        this.physics.arcade.overlap(player, chestGroup1, silverChestOpen, null, this);
+        this.physics.arcade.overlap(player, chestGroup2, goldChestOpen, null, this);
         player.body.velocity.x = 0;
+        
         player.animations.play('idle');
         if (cursors.left.isDown)
         {
             player.animations.play('walk');
-            player.scale.setTo(-2,2);
+            player.scale.setTo(-1,1);
             player.body.velocity.x -= playerSpeed;
         }
         else if (cursors.right.isDown)
         {
             player.animations.play('walk');
-            player.scale.setTo(2,2);
+            player.scale.setTo(1,1);
             player.body.velocity.x += playerSpeed;
         }
         
-
-
         if (cursors.up.isDown && (player.body.onFloor())){   //player is on the ground, so he is allowed to start a jump
             playerJumped = 1;
-            player.body.velocity.y = -384;
+            player.body.velocity.y = -500;
         } 
         else if (cursors.up.isDown && (playerJumped != 0) && (playerJumped < 5)){ //player is no longer on the ground, but is still holding the jump key
             playerJumped++;
@@ -182,7 +200,7 @@ export default class extends Phaser.State{
             } 
             else { // player is allowed to jump higher (not yet 30 frames of jumping)
                 playerJumped++;
-                player.body.velocity.y = -384;
+                player.body.velocity.y = -500;
             }
         } 
         else if (playerJumped != 0) { //reset jumptimer since the player is no longer holding the jump key
@@ -199,6 +217,9 @@ function TileCollide(p, t){
     //if(t.index == 9 && (t.worldY + (t.height + 30)) < p.position.y && (t.worldX - ((p.body.width / 2) - 1)) < p.position.x && (t.worldX + t.width + ((p.body.width / 2) - 1)) > p.position.x){
     //    map.removeTile(t.x, t.y, layer).destroy();
     //}
+    if(t.index == 12){
+        console.log(t)
+    }
 }
 function collectGreenOrb(p, t){    
     score += 50;
@@ -214,5 +235,10 @@ function playerDie(p, t){
     p.kill();
     this.state.start('Level1')
 }
-
+function silverChestOpen(p, t){    
+    t.animations.play('open');
+}
+function goldChestOpen(p, t){    
+    t.animations.play('open');
+}
 
